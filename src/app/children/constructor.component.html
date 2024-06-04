@@ -1,0 +1,15 @@
+<h2><a [routerLink]="['/home']">Назад</a> Constructor</h2>
+
+<div>
+  <code>URL: {{url$()}}</code>
+</div>
+<div>
+  <code>Mode: {{modeName$() ?? 'Не указано'}}</code>
+</div>
+
+<br>
+
+<div>Данные, полученные из текущего сервиса:</div>
+<code>
+  <div *ngFor="let user of users$()">{{user}}</div>
+</code>
