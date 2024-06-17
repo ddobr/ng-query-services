@@ -1,27 +1,63 @@
 # NgQueryServices
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.14.
+Данный репозиторий представляет из себя MVP реализацию утилиты для выбора нужных
+реализаций сервиса в зависимости от query-параметров, а также пример работы
+данной утилиты.
 
-## Development server
+## Зачем?
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+У приложения существуют страницы, базовый функционал и верстка которых могут
+быть переиспользованы, при этом поведение должно немного отличаться, а
+возможности вынести эту страницу в отдельную компоненту нет.
 
-## Code scaffolding
+Например, по умолчанию страница работает в привычном режиме, но появилась
+необходимость добавить онбординг. Было бы удобно, чтобы при указания в
+query-параметрах соответствующего флага, кнопки бы переставили вести себя
+привычным образом и срабатывали в соответствии с процессом онбординга. К
+примеру, кнопка "Сохранить" не работала, если не открыт нужный этап урока.
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Принцип работы
 
-## Build
+Утилита представляет из себя функцию-помощника, которая просто делает нужный
+провайд того или иного сервиса в зависимости от указанных query-параметров
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+## Плюсы
 
-## Running unit tests
+- более явное документирование поведения, программист сразу видит, какие
+  провайды используются при каких квери-параметрах;
+- меньше бойлерплейта. сравните:
+  ```ts
+  createQueryProvider(
+      REQUEST_SERVICE_TOKEN,
+      'mode',
+      [
+        {
+          paramValue: 'a',
+          provider: ARequestService,
+        },
+      ],
+      DefaultRequestService
+    )
+  ```
+  и
+  ```ts
+    {
+      provide: REQUEST_SERVICE_TOKEN,
+      useFactory: () => {
+        const activatedRoute: ActivatedRoute = inject(ActivatedRoute);
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+        if (activatedRoute.snapshot.queryParams.mode === 'a') {
+          return ARequestService;
+        }
 
-## Running end-to-end tests
+        return DefaultRequestService
+      }
+    }
+  ```
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
 
-## Further help
+## Минусы
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+- необходимость в перезагрузке страницы, если изменился наблюдаемый
+  query-параметр, т.к. нужно заново провайдить актуальный сервис, а в рантайме
+  это сделать невозможно;
